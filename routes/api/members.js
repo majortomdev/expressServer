@@ -1,4 +1,5 @@
 const express = require('express');
+const uuid = require('uuid');
 const router = express.Router();
 const members = require('../../Members');
 
@@ -14,7 +15,34 @@ router.get('/:id', (req, res) => {
 
 //create a member
 router.post('/', (req,res) => {
-    res.send(req.body);
+    const newMember = {
+        id: uuid.v4(),
+        name: req.body.name,
+        email: req.body.email,
+        status: 'active'
+    }
+
+    if(!newMember.name || !newMember.email) {
+        res.status(400).json({msg: 'Please enter name and email'})
+    }
+
+    members.push(newMember);
+    res.json(members);
+});
+
+//update members details
+router.put('/:id', (req, res) => {
+    const found = members.some(member => member.id === parseInt(req.params.id));
+    if(found){
+     const updatedMember = req.body;
+     members.forEach(member => {
+         if(member.id === parseInt(req.params.id)){
+             member.name = updatedMember.name ? updatedMember.name: member.name;
+             member.email = updatedMember.email ? updatedMember.email: member.email;
+             res.json({msg: 'Member Updated', member});
+         }
+     });
+    } else res.status(400).json({ msg: `No member with the id of ${req.params.id} was found`});
 });
 
 
